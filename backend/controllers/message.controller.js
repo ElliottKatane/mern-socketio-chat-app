@@ -1,5 +1,7 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
+import { getReceiverSocketId } from "../socket/sockets.js";
+import { io } from "../socket/sockets.js";
 
 export const sendMessage = async (req, res) => {
   try {
@@ -28,12 +30,18 @@ export const sendMessage = async (req, res) => {
       conversation.messages.push(newMessage._id);
     }
 
-    // todo socket.io functionality will go here
-
     // await conversation.save();
     // await newMessage.save();
     // plus rapide: they both will run in parallel
     await Promise.all([conversation.save(), newMessage.save()]);
+
+    // todo socket.io functionality will go here
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      //io.to is used to emit an event to a specific client
+      // io.to(<<socketId>>).emit("<<eventName>>", <<data>>
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
 
     res.status(201).json(newMessage);
   } catch (error) {
