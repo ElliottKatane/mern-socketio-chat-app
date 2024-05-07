@@ -35,7 +35,7 @@ export const sendMessage = async (req, res) => {
     // plus rapide: they both will run in parallel
     await Promise.all([conversation.save(), newMessage.save()]);
 
-    res.status(201).json({ message: "Message sent", newMessage });
+    res.status(201).json(newMessage);
   } catch (error) {
     console.log("error in sendMessage controller", error.message);
     res.status(500).json({ message: error.message });
@@ -51,7 +51,7 @@ export const getMessages = async (req, res) => {
     }).populate("messages"); // not references but actual messages
 
     if (!conversation) {
-      return res.status(200).json({ message: [] });
+      return res.status(200).json([]);
     }
     const messages = conversation.messages;
     res.status(200).json(messages);
